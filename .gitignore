@@ -1,0 +1,4 @@
+Roam_Research
+__pycache__/
+*.pyc
+.DS_Store
