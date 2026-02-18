@@ -1,5 +1,4 @@
 import argparse
-import uuid
 from datetime import datetime, timedelta
 
 import pandas as pd
@@ -127,13 +126,12 @@ def main():
             print(f"  ERROR: Could not get uid for page '{page_title}'. Skipping.")
             continue
 
-        parent_uid = str(uuid.uuid4())[:9]
-        create_block(session, graph_name, page_uid, "> [!Summary]+ **MAS Bills Auction Results**", block_uid=parent_uid)
-
+        lines = ["> [!Summary]+ **MAS Bills Auction Results**"]
         for _, row in group.iterrows():
-            text = f"> {row['Tenor']} | {row['Maturity Date']} | {row['Issue Code']} | {row['Cut-off Yield']}"
-            create_block(session, graph_name, parent_uid, text)
-            print(f"  {text}")
+            line = f"{row['Tenor']} | {row['Maturity Date']} | {row['Issue Code']} | {row['Cut-off Yield']}"
+            lines.append(line)
+            print(f"  {line}")
+        create_block(session, graph_name, page_uid, "\n".join(lines))
 
     print("\nDone.")
 
