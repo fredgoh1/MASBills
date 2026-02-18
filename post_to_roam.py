@@ -128,10 +128,10 @@ def main():
             continue
 
         parent_uid = str(uuid.uuid4())[:9]
-        create_block(session, graph_name, page_uid, "MAS Bills", block_uid=parent_uid)
+        create_block(session, graph_name, page_uid, "> [!Summary]+ **MAS Bills Auction Results**", block_uid=parent_uid)
 
         for _, row in group.iterrows():
-            text = f"{row['Tenor']} | {row['Maturity Date']} | {row['Issue Code']} | {row['Cut-off Yield']}"
+            text = f"> {row['Tenor']} | {row['Maturity Date']} | {row['Issue Code']} | {row['Cut-off Yield']}"
             create_block(session, graph_name, parent_uid, text)
             print(f"  {text}")
 
