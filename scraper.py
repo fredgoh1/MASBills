@@ -45,10 +45,10 @@ def convert_date(date_str):
     return datetime.strptime(date_str, "%d/%m/%Y").strftime("%Y-%m-%d")
 
 
-def scrape_cutoff_yield(driver, issue_code, issue_date_ddmmyyyy):
+def scrape_cutoff_yield(driver, issue_code, issue_date_ddmmyyyy, url_template=AUCTION_URL):
     """Scrape Cut-off Yield for a single bill from the MAS auction page."""
     issue_date = convert_date(issue_date_ddmmyyyy)
-    url = AUCTION_URL.format(issue_code=issue_code, issue_date=issue_date)
+    url = url_template.format(issue_code=issue_code, issue_date=issue_date)
     driver.get(url)
 
     try:
