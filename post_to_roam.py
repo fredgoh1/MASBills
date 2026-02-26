@@ -4,7 +4,10 @@ from datetime import datetime, timedelta
 import pandas as pd
 import requests
 
-CSV_PATH = "inventory/MAS Bills - MAS Bills.csv"
+SOURCES = [
+    ("MAS Bills", "inventory/MAS Bills - MAS Bills.csv"),
+    ("T-Bills", "inventory/SGS Treasury Bills - T-BILLS.csv"),
+]
 CREDENTIALS_FILE = "Roam_Research"
 
 
@@ -103,12 +106,17 @@ def main():
     token, graph_name = load_credentials()
     session = _roam_session(token)
 
-    df = pd.read_csv(CSV_PATH, encoding="utf-8-sig")
+    frames = []
+    for source_name, csv_path in SOURCES:
+        df = pd.read_csv(csv_path, encoding="utf-8-sig")
+        df["_source"] = source_name
+        frames.append(df)
+    combined = pd.concat(frames, ignore_index=True)
 
-    auction_dates = df["Auction Date"].apply(lambda d: datetime.strptime(d, "%d/%m/%Y"))
-    has_yield = df["Cut-off Yield"].fillna("").astype(str).str.strip() != ""
+    auction_dates = combined["Auction Date"].apply(lambda d: datetime.strptime(d, "%d/%m/%Y"))
+    has_yield = combined["Cut-off Yield"].fillna("").astype(str).str.strip() != ""
     date_mask = (auction_dates >= start) & (auction_dates <= end)
-    target = df[date_mask & has_yield].copy()
+    target = combined[date_mask & has_yield].copy()
     target["_auction_dt"] = auction_dates[target.index]
 
     if target.empty:
@@ -117,7 +125,7 @@ def main():
 
     grouped = target.groupby("_auction_dt")
 
-    for auction_dt, group in sorted(grouped):
+    for auction_dt, date_group in sorted(grouped):
         page_title = roam_daily_title(auction_dt)
         print(f"\nPosting to '{page_title}'...")
 
@@ -126,12 +134,13 @@ def main():
             print(f"  ERROR: Could not get uid for page '{page_title}'. Skipping.")
             continue
 
-        lines = ["> [!Summary]+ **MAS Bills Auction Results**"]
-        for _, row in group.iterrows():
-            line = f"{row['Tenor']} | {row['Maturity Date']} | {row['Issue Code']} | {row['Cut-off Yield']}"
-            lines.append(line)
-            print(f"  {line}")
-        create_block(session, graph_name, page_uid, "\n".join(lines))
+        for source_name, source_group in date_group.groupby("_source"):
+            lines = [f"> [!Summary]+ **{source_name} Auction Results**"]
+            for _, row in source_group.iterrows():
+                line = f"{row['Tenor']} | {row['Maturity Date']} | {row['Issue Code']} | {row['Cut-off Yield']}"
+                lines.append(line)
+                print(f"  [{source_name}] {line}")
+            create_block(session, graph_name, page_uid, "\n".join(lines))
 
     print("\nDone.")
 
