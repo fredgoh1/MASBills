@@ -35,7 +35,7 @@ def main():
 
     if target_count == 0:
         print(f"No upcoming/open T-Bills with Auction Date on or before {args.date}.")
-        return
+        return 0
 
     print(f"Found {target_count} T-Bill(s) to scrape.\n")
 
@@ -62,6 +62,7 @@ def main():
 
     df.to_csv(CSV_PATH, index=False, encoding="utf-8")
     print(f"\nDone. CSV updated at {CSV_PATH}")
+    return target_count
 
 
 if __name__ == "__main__":

@@ -31,8 +31,13 @@ Dates use **DD/MM/YYYY** format. The CSV includes a UTF-8 BOM marker.
 |---|---|
 | `scraper.py` | Scrapes Cut-off Yield for all closed bills from MAS website (Selenium) |
 | `export_excel.py` | Exports CSV to `inventory/MAS Bills - MAS Bills.xlsx` |
-| `scrape_upcoming.py` | Scrapes upcoming bills up to a given date, updates CSV |
+| `scrape_upcoming.py` | Scrapes upcoming MAS Bills up to a given date, updates CSV; returns bill count (0 = none found) |
+| `t_bill_scrape_upcoming.py` | Scrapes upcoming T-Bills up to a given date, updates CSV; returns bill count (0 = none found) |
 | `post_to_roam.py` | Posts auction results to Roam Research daily pages |
+| `MASBills_run_pipeline.py` | Pipeline: scrape upcoming MAS Bills then post to Roam (`--date YYYY-MM-DD`, defaults to today) |
+| `TBills_run_pipeline.py` | Pipeline: scrape upcoming T-Bills then post to Roam (`--date YYYY-MM-DD`, defaults to today) |
+
+The pipeline scripts exit gracefully (skipping the Roam post) if no bills are scraped — handles edge cases like public holidays when no auctions occur. Intended to be run weekly via crontab on Tuesdays.
 
 ## Roam Research Integration
 
